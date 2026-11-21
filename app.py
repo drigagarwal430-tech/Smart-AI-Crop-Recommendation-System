@@ -32,10 +32,25 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* Main application background */
+/* SmartCrop dashboard theme */
+:root {
+    --ink: #17352b;
+    --muted: #687b71;
+    --green: #28734e;
+    --line: #e3ebe4;
+    --surface: #ffffff;
+    --font-sans: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 .stApp {
-    background-color: #F7F9F5;
-    color: #24382D;
+    background: radial-gradient(ellipse at 88% 0%, #edf6ee 0%, transparent 34%), #f5f8f5;
+    color: var(--ink);
+    font-family: var(--font-sans);
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
 }
 
 /* Hide default Streamlit decoration */
@@ -44,14 +59,14 @@ footer {visibility: hidden;}
 
 /* Main content spacing */
 .block-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    max-width: 1450px;
+    padding: 2.2rem 2.5rem 3.5rem;
+    max-width: 1500px;
 }
 
 /* Sidebar */
 [data-testid="stSidebar"] {
-    background-color: #173F32;
+    background: linear-gradient(180deg, #153b2e 0%, #1c4b37 100%);
+    border-right: 1px solid rgba(255,255,255,.08);
 }
 
 [data-testid="stSidebar"] * {
@@ -60,34 +75,79 @@ footer {visibility: hidden;}
 
 /* Main headings */
 h1, h2, h3 {
-    color: #173F32 !important;
+    color: var(--ink) !important;
     font-weight: 700 !important;
+    letter-spacing: -0.025em;
+    line-height: 1.2 !important;
+}
+
+h1 { font-size: clamp(2rem, 3vw, 2.8rem) !important; }
+h2 { font-size: 1.65rem !important; }
+h3 { font-size: 1.15rem !important; }
+[data-testid="stMarkdownContainer"] p { color: var(--muted); line-height: 1.65; }
+[data-testid="stVerticalBlockBorderWrapper"] { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 26px rgba(24, 62, 43, .045); }
+
+/* Sidebar section links */
+.side-nav-link {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #e4efe7 !important;
+    display: flex;
+    gap: 0.8rem;
+    margin: 0.25rem 0;
+    padding: 0.72rem 0.8rem;
+    text-decoration: none !important;
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.side-nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff !important;
+    transform: translateX(2px);
+}
+
+.side-nav-index {
+    color: #a9cbb4 !important;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
 }
 
 /* Buttons */
 .stButton > button {
-    background-color: #26734D;
+    background: linear-gradient(135deg, #28734e, #205c40);
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 11px;
+    min-height: 2.8rem;
     padding: 0.65rem 1.2rem;
     font-weight: 600;
-    transition: 0.2s;
+    box-shadow: 0 5px 14px rgba(40, 115, 78, .18);
+    transition: transform .18s ease, box-shadow .18s ease;
 }
 
 .stButton > button:hover {
-    background-color: #173F32;
+    background: #173f32;
     color: white;
     border: none;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(40, 115, 78, .24);
 }
 
 /* Input fields */
 .stTextInput input,
 .stNumberInput input {
-    border-radius: 8px;
-    border: 1px solid #D6E1D5;
+    border-radius: 10px;
+    border: 1px solid #d8e3da;
     background-color: #FFFFFF;
+    min-height: 2.75rem;
 }
+
+[data-testid="stTextInput"] label, [data-testid="stNumberInput"] label { color: #355345; font-weight: 600; }
+[data-testid="stMetric"] { background: #f7faf7; border: 1px solid var(--line); padding: 15px 18px; border-radius: 13px; }
+[data-testid="stMetricValue"] { color: var(--ink); }
 
 /* Data tables */
 [data-testid="stDataFrame"] {
@@ -97,8 +157,11 @@ h1, h2, h3 {
 
 /* Dividers */
 hr {
-    border-color: #DFE8DC;
+    border-color: #e2ebe3;
+    margin: 1.8rem 0;
 }
+
+@media (max-width: 760px) { .block-container { padding: 1.2rem 1rem 2rem; } }
 
 </style>
 """, unsafe_allow_html=True)
@@ -118,19 +181,23 @@ with st.sidebar:
 
     st.markdown("### Navigation")
 
-    st.markdown("""
-    🌾 Crop Recommendation
-
-    🧪 Soil Analysis
-
-    🤖 Explainable AI
-
-    🌐 Knowledge Graph
-
-    📊 Farmer Analysis
-
-    💾 Database
-    """)
+    navigation_links = (
+        ("01", "🌾 Crop Recommendation", "section-crop-recommendation"),
+        ("02", "🧪 Soil Analysis", "section-soil-analysis"),
+        ("03", "🤖 Explainable AI", "section-explainable-ai"),
+        ("04", "🌐 Knowledge Graph", "section-knowledge-graph"),
+        ("05", "📊 Farmer Analysis", "section-farmer-analysis"),
+        ("06", "💾 Database", "section-database"),
+    )
+    st.markdown(
+        "".join(
+            f'<a class="side-nav-link" href="#{anchor}">'
+            f'<span class="side-nav-index">{number}</span>'
+            f'<span>{label}</span></a>'
+            for number, label, anchor in navigation_links
+        ),
+        unsafe_allow_html=True
+    )
 
     st.divider()
 
@@ -235,6 +302,8 @@ st.divider()
 # =====================================
 # 2. SOIL INFORMATION
 # =====================================
+
+st.html('<div id="section-soil-analysis"></div>')
 
 
 # =====================================
@@ -343,6 +412,8 @@ st.divider()
 # =====================================
 # 4. CROP RECOMMENDATION
 # =====================================
+
+st.html('<div id="section-crop-recommendation"></div>')
 
 
 # =====================================
@@ -466,6 +537,7 @@ if recommend_clicked:
     # 5. EXPLAINABLE AI - FEATURE SENSITIVITY
     # =====================================
 
+        st.html('<div id="section-explainable-ai"></div>')
         st.divider()
 
         st.header("🤖 Explainable AI (Feature Sensitivity Analysis)")
@@ -484,6 +556,7 @@ if recommend_clicked:
         # SAVE RECORDS TO MYSQL DATABASE
         # =====================================
 
+        st.html('<div id="section-database"></div>')
         database_saved = save_farmer_record(
             farmer_name=farmer_name,
             location=location,
@@ -503,7 +576,7 @@ if recommend_clicked:
         else:
             st.warning(
                 "Crop recommendation generated, but database saving failed. "
-                "Please check the MySQL connection."
+                "Check MYSQL_PASSWORD and confirm database/schema.sql has been applied."
             )
 
         st.write(
@@ -524,9 +597,28 @@ if recommend_clicked:
 
         st.subheader("📈 Feature Importance")
 
-        st.bar_chart(
-            explanation.set_index("Feature")["Importance"]
-        )
+        # A compact horizontal chart makes feature importance easier to scan.
+        chart_data = explanation.sort_values("Importance", ascending=True)
+        fig, ax = plt.subplots(figsize=(9, max(3.2, len(chart_data) * 0.48)), dpi=120)
+        fig.patch.set_facecolor("#ffffff")
+        ax.set_facecolor("#ffffff")
+        bar_colors = ["#75ad83" if value >= 0 else "#d98b70" for value in chart_data["Impact"]]
+        ax.barh(chart_data["Feature"], chart_data["Importance"], color=bar_colors,
+                height=0.48, edgecolor="none", zorder=3)
+        ax.scatter(chart_data["Importance"], chart_data["Feature"], color="#205c40",
+                   s=30, zorder=4, edgecolors="white", linewidths=1)
+        ax.set_xlabel("Relative importance", color="#687b71", labelpad=10)
+        ax.grid(axis="x", color="#e7eee8", linewidth=0.9, zorder=0)
+        for spine in ("top", "right", "left"):
+            ax.spines[spine].set_visible(False)
+        ax.spines["bottom"].set_color("#dce6dd")
+        ax.tick_params(axis="y", length=0, colors="#355345", labelsize=10, pad=9)
+        ax.tick_params(axis="x", colors="#829188", labelsize=9)
+        ax.set_axisbelow(True)
+        fig.tight_layout(pad=1.5)
+        st.pyplot(fig, use_container_width=True)
+        plt.close(fig)
+        st.caption("Bar color reflects sensitivity direction: green is positive, terracotta is negative.")
 
         st.subheader("🔍 Understanding the Explanation")
 
@@ -563,6 +655,7 @@ if recommend_clicked:
         # 6. SOIL-CROP KNOWLEDGE GRAPH
         # =====================================
 
+        st.html('<div id="section-knowledge-graph"></div>')
         st.divider()
 
         st.header("🌐 Soil-Crop Knowledge Graph")
@@ -605,6 +698,7 @@ if recommend_clicked:
             # 7. FARMER CONDITION COMPARISON
             # =====================================
 
+            st.html('<div id="section-farmer-analysis"></div>')
             st.divider()
 
             st.subheader("📋 Farmer Condition Analysis")
@@ -691,19 +785,21 @@ if recommend_clicked:
 
                 positions = {
                     predicted_crop: (0, 0),
-                    "Nitrogen": (0, 1.0),
-                    "Phosphorus": (0.78, 0.62),
-                    "Potassium": (0.78, -0.62),
-                    "Temperature": (0, -1.0),
-                    "Humidity": (-0.78, -0.62),
-                    "Soil pH": (-0.78, 0.62),
-                    "Rainfall": (-1.05, 0)
+                    "Nitrogen": (0, 2.3),
+                    "Phosphorus": (2.2, 1.4),
+                    "Potassium": (2.35, -1.0),
+                    "Temperature": (0, -2.3),
+                    "Humidity": (-2.35, -1.0),
+                    "Soil pH": (-2.2, 1.4),
+                    "Rainfall": (-2.75, 0)
                 }
 
                 fig, ax = plt.subplots(
-                    figsize=(6, 4),
-                    dpi=90
+                    figsize=(10, 7),
+                    dpi=140
                 )
+                fig.patch.set_facecolor("#f8fbf8")
+                ax.set_facecolor("#f8fbf8")
 
                 # Draw relationships
                 nx.draw_networkx_edges(
@@ -711,9 +807,10 @@ if recommend_clicked:
                     positions,
                     arrows=True,
                     arrowstyle="-|>",
-                    arrowsize=12,
-                    width=1.2,
-                    edge_color="gray",
+                    arrowsize=11,
+                    width=1.5,
+                    edge_color="#91b59a",
+                    alpha=0.8,
                     ax=ax
                 )
 
@@ -725,15 +822,16 @@ if recommend_clicked:
                     ax.text(
                         x, y,
                         node,
-                        fontsize=8,
+                        fontsize=8.5,
                         fontweight="bold",
                         ha="center",
                         va="center",
+                        color="#244536",
                         bbox=dict(
-                            boxstyle="round,pad=0.45",
-                            facecolor="lightgreen",
-                            edgecolor="green",
-                            linewidth=1.3
+                            boxstyle="round,pad=0.65,rounding_size=0.18",
+                            facecolor="#e4f1e6",
+                            edgecolor="#a9cfaf",
+                            linewidth=1.2
                         )
                     )
 
@@ -745,36 +843,37 @@ if recommend_clicked:
                     ax.text(
                         x, y,
                         node.capitalize(),
-                        fontsize=10,
+                        fontsize=12,
                         fontweight="bold",
                         ha="center",
                         va="center",
+                        color="#ffffff",
                         bbox=dict(
-                            boxstyle="round,pad=0.65",
-                            facecolor="orange",
-                            edgecolor="darkorange",
-                            linewidth=2
+                            boxstyle="round,pad=0.8",
+                            facecolor="#205c40",
+                            edgecolor="#16442f",
+                            linewidth=1.8
                         )
                     )
 
-                ax.set_xlim(-1.55, 1.25)
-                ax.set_ylim(-1.35, 1.35)
+                ax.set_xlim(-3.45, 3.15)
+                ax.set_ylim(-2.9, 2.9)
 
                 ax.set_aspect("equal")
                 ax.axis("off")
 
-                plt.tight_layout(pad=1)
+                fig.tight_layout(pad=1.8)
 
                 st.pyplot(
                     fig,
-                    use_container_width=False
+                    use_container_width=True
                 )
 
                 plt.close(fig)
 
                 st.caption(
-                    "Orange box: Recommended crop | "
-                    "Green boxes: Soil and weather factors"
+                    "Dark green: Recommended crop | "
+                    "Light green: Soil and weather factors"
                 )
 
             else:
